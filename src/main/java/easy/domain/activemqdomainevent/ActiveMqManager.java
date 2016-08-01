@@ -142,6 +142,16 @@ public class ActiveMqManager {
 		message.setConnection((ActiveMQConnection) connection);
 		return message;
 	}
+	
+	public void close(){
+		if (connection != null) {
+			try {
+				connection.close();
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	@Override
 	protected void finalize() {
