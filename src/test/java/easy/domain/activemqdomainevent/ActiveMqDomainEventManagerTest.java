@@ -2,12 +2,12 @@ package easy.domain.activemqdomainevent;
 
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.Ignore;
 
 import easy.domain.event.ISubscriber;
 
 public class ActiveMqDomainEventManagerTest {
-	@Test
+	@Ignore
 	public void loadTest() {
 		ActiveMqManager m = new ActiveMqManager(
 				"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0","abbbc");

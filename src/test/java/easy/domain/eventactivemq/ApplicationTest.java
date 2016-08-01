@@ -1,9 +1,9 @@
 package easy.domain.eventactivemq;
 
-import org.junit.Test;
+import org.junit.Ignore;
 
 public class ApplicationTest {
-	@Test
+	@Ignore
 	public void test(){
 		ApplicationCenter.getDemo().add();
 	}

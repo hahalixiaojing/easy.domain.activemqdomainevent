@@ -4,11 +4,11 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
 
-import org.junit.Test;
+import org.junit.Ignore;
 
 public class ActiveMqManagerTest {
 
-	@Test
+	@Ignore
 	public void queueTest() {
 		ActiveMqManager m = new ActiveMqManager(
 				"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0");
@@ -43,7 +43,7 @@ public class ActiveMqManagerTest {
 		}
 	}
 
-	@Test
+	@Ignore
 	public void topicTest() {
 		ActiveMqManager m = new ActiveMqManager(
 				"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
