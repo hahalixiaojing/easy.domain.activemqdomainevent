@@ -133,7 +133,7 @@ public class ActiveMqManager {
 
 	public TextMessage createTextMessage(String text) {
 		ActiveMQTextMessage message = new ActiveMQTextMessage();
-		
+
 		try {
 			message.setText(text);
 		} catch (MessageNotWriteableException e) {
@@ -141,6 +141,17 @@ public class ActiveMqManager {
 		}
 		message.setConnection((ActiveMQConnection) connection);
 		return message;
+	}
+
+	@Override
+	protected void finalize() {
+		if (connection != null) {
+			try {
+				connection.close();
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }
