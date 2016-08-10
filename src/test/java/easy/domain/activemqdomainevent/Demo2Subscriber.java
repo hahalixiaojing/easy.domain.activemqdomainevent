@@ -2,7 +2,7 @@ package easy.domain.activemqdomainevent;
 
 import easy.domain.event.IDomainEvent;
 
-public class DemoSubscriber implements IActiveMqDomainEventSubscriber{
+public class Demo2Subscriber implements IActiveMqDomainEventSubscriber {
 
 	@Override
 	public <T extends IDomainEvent> Class<?> suscribedToEventType() {
@@ -13,6 +13,7 @@ public class DemoSubscriber implements IActiveMqDomainEventSubscriber{
 	public void handleEvent(String aDomainEvent) {
 
 		System.out.println("thread id=" + Thread.currentThread().getId());
+
 	}
 
 }

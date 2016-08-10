@@ -24,7 +24,6 @@ import java.util.List;
 
 public class ActiveMqManager {
 	private Connection connection;
-	private Session session;
 	private final List<MessageConsumer> queueConsumers = new ArrayList<>();
 	private final HashMap<String, MessageConsumer> topicConsumers = new HashMap<>();
 
@@ -46,10 +45,6 @@ public class ActiveMqManager {
 			if (!StringUtils.isEmpty(clientid)) {
 				connection.setClientID(clientid);
 			}
-
-			session = connection.createSession(false,
-					Session.CLIENT_ACKNOWLEDGE);
-			System.out.println(session.getClass().getName());
 			connection.start();
 
 		} catch (JMSException e) {
@@ -69,10 +64,6 @@ public class ActiveMqManager {
 		return clientId;
 	}
 
-	public Session getSession() {
-		return session;
-	}
-
 	private void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
@@ -80,8 +71,9 @@ public class ActiveMqManager {
 	public MessageProducer createTopicPublisher(String topicName) {
 		Topic topic;
 		try {
-			topic = this.session.createTopic(topicName);
-			return session.createProducer(topic);
+			Session publisherSession = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+			topic = publisherSession.createTopic(topicName);
+			return publisherSession.createProducer(topic);
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
@@ -91,8 +83,9 @@ public class ActiveMqManager {
 	public MessageProducer createQueueProducer(String queueName) {
 		Destination dest;
 		try {
-			dest = this.session.createQueue(queueName);
-			return this.session.createProducer(dest);
+			Session producerSession = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+			dest = producerSession.createQueue(queueName);
+			return producerSession.createProducer(dest);
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
@@ -108,8 +101,9 @@ public class ActiveMqManager {
 			String selector, MessageListener listener) {
 
 		try {
-			Topic topic = this.session.createTopic(topicName);
-			MessageConsumer consumer = this.session.createDurableSubscriber(
+			Session consumerSession = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+			Topic topic = consumerSession.createTopic(topicName);
+			MessageConsumer consumer = consumerSession.createDurableSubscriber(
 					topic, subscriberName, selector, false);
 
 			consumer.setMessageListener(listener);
@@ -122,8 +116,9 @@ public class ActiveMqManager {
 
 	public void registerQueueConsumer(String name, MessageListener listener) {
 		try {
-			Queue q = this.session.createQueue(name);
-			MessageConsumer consumer = session.createConsumer(q);
+			Session consumerSession = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+			Queue q = consumerSession.createQueue(name);
+			MessageConsumer consumer = consumerSession.createConsumer(q);
 			consumer.setMessageListener(listener);
 			this.queueConsumers.add(consumer);
 		} catch (JMSException e) {
