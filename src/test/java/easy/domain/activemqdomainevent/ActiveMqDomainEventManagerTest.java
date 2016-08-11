@@ -7,19 +7,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import easy.domain.event.ISubscriber;
 
 public class ActiveMqDomainEventManagerTest {
-	@Test
-	public void loadTest() throws Exception {
-		ActiveMqManager m = new ActiveMqManager(
-				"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
-				"abbbc");
 
-		ActiveMqDomainEventManager manager = new ActiveMqDomainEventManager(m);
+	private ActiveMqDomainEventManager create(String clientid) {
+
+		ActiveMqManager activeMq = ActiveMqManagerFactory
+				.createActiveMqManager(
+						"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
+						clientid);
+
+		ActiveMqDomainEventManager manager = new ActiveMqDomainEventManager(
+				activeMq);
 
 		ArrayList<Class<?>> ar = new ArrayList<>();
 		ar.add(DemoDomainEvent.class);
@@ -34,43 +36,64 @@ public class ActiveMqDomainEventManagerTest {
 
 		manager.registerSubscriber("", sub);
 
+		return manager;
+
+	}
+
+	@Test
+	public void loadTest() throws Exception {
 		DemoDomainEvent evt = new DemoDomainEvent();
 		evt.setName("test");
 
-		ArrayList<Callable<String>> list = new ArrayList<Callable<String>>();
+		ActiveMqDomainEventManager m1 = this.create("abbbc");
+		ActiveMqDomainEventManager m2 = this.create("acccb");
 
-		for (int i = 0; i < 1; i++) {
 
-			Callable<String> r = () -> {
+		Callable<String> c1 = () -> {
+			for (int i = 0; i < 1000; i++) {
+				m1.publishEvent("", evt);
+				System.out.println("send ="+ Thread.currentThread().getId());
+			}
 
-				for (int j = 0; j < 2000; j++) {
+			return "OK1";
+		};
 
-					manager.publishEvent("", evt);
-					System.out.println(j);
-				}
+		Callable<String> c2 = () -> {
+			for (int i = 0; i < 1000; i++) {
+				m2.publishEvent("", evt);
+				System.out.println("send ="+ Thread.currentThread().getId());
+			}
 
-				return "";
-			};
+			return "OK2";
+		};
 
-			list.add(r);
+		List<Callable<String>> callables = new ArrayList<>(2);
+		callables.add(c1);
+		callables.add(c2);
 
-		}
 		StopWatch sw = new StopWatch();
 		sw.start();
+
 		List<Future<String>> result = Executors.newFixedThreadPool(2)
-				.invokeAll(list);
+				.invokeAll(callables);
+
 		sw.stop();
+		System.out.println(String.format("total time is %s", sw.getTime()));
 
-		System.out.println("time=" + sw.getTime());
-		result.get(0);
+		result.stream().forEach(f -> {
 
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+			try {
+				String r = f.get();
+				System.out.println(r);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-		m.close();
+		});
+
+		ActiveMqManagerFactory.clear();
+		
+		
 
 	}
 }
