@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
 
@@ -47,29 +49,26 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
 		}
 		String route = String.format("route='%s'", this.manager.getClientId());
 
-		for (ISubscriber subscriber : items) {
+		for (final ISubscriber subscriber : items) {
 
 			String subscriberName = subscriber.getClass().getName();
-			this.manager
-					.registerTopicConsumer(
-							evtName,
-							subscriberName,
-							route,
-							(msg) -> {
+			this.manager.registerTopicConsumer(evtName, subscriberName, route,
+					new MessageListener() {
 
-								TextMessage textMsg = (TextMessage) msg;
-								IActiveMqDomainEventSubscriber sub = (IActiveMqDomainEventSubscriber) subscriber;
+						@Override
+						public void onMessage(Message message) {
+							TextMessage textMsg = (TextMessage) message;
+							IActiveMqDomainEventSubscriber sub = (IActiveMqDomainEventSubscriber) subscriber;
 
-								try {
-									sub.handleEvent(textMsg.getText());
-									msg.acknowledge();
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-
-							});
+							try {
+								sub.handleEvent(textMsg.getText());
+								message.acknowledge();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
 		}
-
 	}
 
 	@Override

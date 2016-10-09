@@ -1,30 +1,37 @@
 package easy.domain.activemqdomainevent;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
 
-import org.junit.Ignore;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 public class ActiveMqManagerTest {
 
-	@Ignore
+	@Test
 	public void queueTest() {
 		ActiveMqManager m = new ActiveMqManager(
 				"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0");
 
 		MessageProducer p = m.createQueueProducer("testjava");
 
-		m.registerQueueConsumer("testjava", (message) -> {
+		m.registerQueueConsumer("testjava", new MessageListener() {
 
-			TextMessage msg = (TextMessage) message;
+			@Override
+			public void onMessage(Message message) {
+				TextMessage msg = (TextMessage) message;
 
-			try {
-				String text = msg.getText();
-				System.out.println(text);
-				msg.acknowledge();
-			} catch (Exception e) {
-				e.printStackTrace();
+				try {
+					String text = msg.getText();
+					System.out.println(text);
+					msg.acknowledge();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 			}
 		});
 
@@ -43,7 +50,7 @@ public class ActiveMqManagerTest {
 		}
 	}
 
-	@Ignore
+	@Test
 	public void topicTest() {
 		ActiveMqManager m = new ActiveMqManager(
 				"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
@@ -51,29 +58,38 @@ public class ActiveMqManagerTest {
 
 		MessageProducer p = m.createTopicPublisher("testtopic");
 
-		m.registerTopicConsumer("testtopic", "wechat", (msg) -> {
-			TextMessage textMsg = (TextMessage) msg;
+		m.registerTopicConsumer("testtopic", "wechat", new MessageListener() {
 
-			try {
-				String text = textMsg.getText();
-				System.out.println("webchat" + text);
+			@Override
+			public void onMessage(Message message) {
+				TextMessage textMsg = (TextMessage) message;
 
-				msg.acknowledge();
-			} catch (Exception e) {
-				e.printStackTrace();
+				try {
+					String text = textMsg.getText();
+					System.out.println("webchat" + text);
+
+					message.acknowledge();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
 
-		m.registerTopicConsumer("testtopic", "email", (msg) -> {
-			TextMessage textMsg = (TextMessage) msg;
+		m.registerTopicConsumer("testtopic", "email", new MessageListener() {
 
-			try {
-				String text = textMsg.getText();
-				System.out.println("email" + text);
+			@Override
+			public void onMessage(Message message) {
+				TextMessage textMsg = (TextMessage) message;
 
-				msg.acknowledge();
-			} catch (Exception e) {
-				e.printStackTrace();
+				try {
+					String text = textMsg.getText();
+					System.out.println("email" + text);
+
+					message.acknowledge();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 			}
 		});
 
@@ -91,5 +107,9 @@ public class ActiveMqManagerTest {
 
 		}
 
+	}
+	@AfterClass
+	public static void clear(){
+		ActiveMqManagerFactory.clear();
 	}
 }

@@ -1,4 +1,4 @@
-package easy.domain.eventactivemq.demo.adddomainevents;
+package easy.domain.eventactivemq.addevents;
 
 import easy.domain.event.IDomainEvent;
 

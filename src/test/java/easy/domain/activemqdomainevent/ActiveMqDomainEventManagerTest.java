@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import easy.domain.event.ISubscriber;
@@ -42,31 +43,37 @@ public class ActiveMqDomainEventManagerTest {
 
 	@Test
 	public void loadTest() throws Exception {
-		DemoDomainEvent evt = new DemoDomainEvent();
+		final DemoDomainEvent evt = new DemoDomainEvent();
 		evt.setName("test");
 
-		ActiveMqDomainEventManager m1 = this.create("abbbc");
-		ActiveMqDomainEventManager m2 = this.create("acccb");
+		final ActiveMqDomainEventManager m1 = this.create("abbbc");
+		final ActiveMqDomainEventManager m2 = this.create("acccb");
+		Callable<String> c1 = new Callable<String>() {
 
+			@Override
+			public String call() throws Exception {
+				for (int i = 0; i < 100; i++) {
+					m1.publishEvent("", evt);
+					System.out.println("send ="
+							+ Thread.currentThread().getId());
+				}
 
-		Callable<String> c1 = () -> {
-			for (int i = 0; i < 1000; i++) {
-				m1.publishEvent("", evt);
-				System.out.println("send ="+ Thread.currentThread().getId());
+				return "OK1";
 			}
-
-			return "OK1";
 		};
+		Callable<String> c2 = new Callable<String>() {
 
-		Callable<String> c2 = () -> {
-			for (int i = 0; i < 1000; i++) {
-				m2.publishEvent("", evt);
-				System.out.println("send ="+ Thread.currentThread().getId());
+			@Override
+			public String call() throws Exception {
+				for (int i = 0; i < 100; i++) {
+					m2.publishEvent("", evt);
+					System.out.println("send ="
+							+ Thread.currentThread().getId());
+				}
+
+				return "OK2";
 			}
-
-			return "OK2";
 		};
-
 		List<Callable<String>> callables = new ArrayList<>(2);
 		callables.add(c1);
 		callables.add(c2);
@@ -80,20 +87,17 @@ public class ActiveMqDomainEventManagerTest {
 		sw.stop();
 		System.out.println(String.format("total time is %s", sw.getTime()));
 
-		result.stream().forEach(f -> {
-
+		for (Future<String> f : result) {
 			try {
 				String r = f.get();
 				System.out.println(r);
 			} catch (Exception e) {
-				e.printStackTrace();
+
 			}
-
-		});
-
+		}
+	}
+	@AfterClass
+	public static void clear(){
 		ActiveMqManagerFactory.clear();
-		
-		
-
 	}
 }

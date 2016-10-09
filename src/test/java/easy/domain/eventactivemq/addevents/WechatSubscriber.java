@@ -1,9 +1,9 @@
-package easy.domain.eventactivemq.demo.adddomainevents;
+package easy.domain.eventactivemq.addevents;
 
 import easy.domain.activemqdomainevent.IActiveMqDomainEventSubscriber;
 import easy.domain.event.IDomainEvent;
 
-public class Emailsubscriber implements IActiveMqDomainEventSubscriber {
+public class WechatSubscriber implements IActiveMqDomainEventSubscriber {
 
 	@Override
 	public <T extends IDomainEvent> Class<?> suscribedToEventType() {
@@ -13,8 +13,7 @@ public class Emailsubscriber implements IActiveMqDomainEventSubscriber {
 	@Override
 	public void handleEvent(String aDomainEvent) {
 
-		System.out.println("email" + aDomainEvent);
-
+		System.out.println(aDomainEvent);
 	}
 
 }
