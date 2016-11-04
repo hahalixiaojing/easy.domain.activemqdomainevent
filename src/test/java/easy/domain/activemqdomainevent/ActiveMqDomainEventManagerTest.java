@@ -16,10 +16,17 @@ public class ActiveMqDomainEventManagerTest {
 
 	private ActiveMqDomainEventManager create(String clientid) {
 
+		// failover:(tcp://broker1:61616,tcp://broker2:61616,tcp://broker3:61616)
+
 		ActiveMqManager activeMq = ActiveMqManagerFactory
 				.createActiveMqManager(
-						"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
+						"failover:(tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0,tcp://127.0.0.1:61617?wireFormat.maxInactivityDuration=0)",
 						clientid);
+
+		// ActiveMqManager activeMq = ActiveMqManagerFactory
+		// .createActiveMqManager(
+		// "tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
+		// clientid);
 
 		ActiveMqDomainEventManager manager = new ActiveMqDomainEventManager(
 				activeMq);
@@ -96,8 +103,9 @@ public class ActiveMqDomainEventManagerTest {
 			}
 		}
 	}
+
 	@AfterClass
-	public static void clear(){
+	public static void clear() {
 		ActiveMqManagerFactory.clear();
 	}
 }
