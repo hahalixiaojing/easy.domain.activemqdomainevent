@@ -42,7 +42,7 @@ public class ActiveMqDomainEventManagerTest {
 		sub.add(dsub);
 		sub.add(dsub2);
 
-		manager.registerSubscriber("", sub);
+		manager.registerSubscriber(sub);
 
 		return manager;
 
@@ -60,7 +60,7 @@ public class ActiveMqDomainEventManagerTest {
 			@Override
 			public String call() throws Exception {
 				for (int i = 0; i < 100; i++) {
-					m1.publishEvent("", evt);
+					m1.publishEvent(evt);
 					System.out.println("send ="
 							+ Thread.currentThread().getId());
 				}
@@ -73,7 +73,7 @@ public class ActiveMqDomainEventManagerTest {
 			@Override
 			public String call() throws Exception {
 				for (int i = 0; i < 100; i++) {
-					m2.publishEvent("", evt);
+					m2.publishEvent(evt);
 					System.out.println("send ="
 							+ Thread.currentThread().getId());
 				}

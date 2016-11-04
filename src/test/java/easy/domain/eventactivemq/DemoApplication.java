@@ -15,6 +15,6 @@ public class DemoApplication extends BaseApplication {
 		TestDomainEvent evt = new TestDomainEvent();
 		evt.setName("test");
 
-		this.publishEvent("add", evt);
+		this.publishEvent(evt);
 	}
 }

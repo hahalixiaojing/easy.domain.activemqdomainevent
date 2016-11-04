@@ -41,7 +41,7 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
 	}
 
 	@Override
-	public void registerSubscriber(String name, List<ISubscriber> items) {
+	public void registerSubscriber(List<ISubscriber> items) {
 
 		String evtName = StringUtils.EMPTY;
 		if (items.size() > 0) {
@@ -72,20 +72,20 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
 	}
 
 	@Override
-	public <T extends IDomainEvent> void publishEvent(String name, T obj) {
+	public <T extends IDomainEvent> void publishEvent(T obj) {
 		String evt = obj.getClass().getName();
-		if (this.producers.containsKey(evt)) {
-			MessageProducer producer = producers.get(evt);
-			String jsonText = JSON.toJSONString(obj);
-			TextMessage textMsg = this.manager.createTextMessage(jsonText);
-			try {
-				textMsg.setStringProperty("route", this.manager.getClientId());
-				textMsg.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
-				producer.send(textMsg);
+		if (!this.producers.containsKey(evt)) {
+			return;
+		}
+		MessageProducer producer = producers.get(evt);
+		String jsonText = JSON.toJSONString(obj);
+		TextMessage textMsg = this.manager.createTextMessage(jsonText);
+		try {
+			textMsg.setStringProperty("route", this.manager.getClientId());
+			textMsg.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
+			producer.send(textMsg);
 
-			} catch (JMSException e) {
-				e.printStackTrace();
-			}
+		} catch (JMSException e) {
 		}
 	}
 }
