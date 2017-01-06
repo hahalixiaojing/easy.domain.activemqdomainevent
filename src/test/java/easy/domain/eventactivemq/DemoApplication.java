@@ -1,7 +1,7 @@
 package easy.domain.eventactivemq;
 
 import easy.domain.application.BaseApplication;
-import easy.domain.application.IDomainEventManager;
+import easy.domain.application.subscriber.IDomainEventManager;
 import easy.domain.eventactivemq.addevents.TestDomainEvent;
 
 public class DemoApplication extends BaseApplication {

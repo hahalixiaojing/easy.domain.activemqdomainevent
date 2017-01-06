@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 
-import easy.domain.application.IDomainEventManager;
+import easy.domain.application.subscriber.IDomainEventManager;
 import easy.domain.event.IDomainEvent;
 import easy.domain.event.ISubscriber;
 
