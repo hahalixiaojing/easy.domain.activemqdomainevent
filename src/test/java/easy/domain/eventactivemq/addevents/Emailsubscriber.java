@@ -6,7 +6,7 @@ import easy.domain.event.IDomainEvent;
 public class Emailsubscriber implements IActiveMqDomainEventSubscriber {
 
 	@Override
-	public <T extends IDomainEvent> Class<?> suscribedToEventType() {
+	public  Class<?> suscribedToEventType() {
 		return TestDomainEvent.class;
 	}
 

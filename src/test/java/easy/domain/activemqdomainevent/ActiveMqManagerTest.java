@@ -6,110 +6,122 @@ import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
 
+import com.alibaba.fastjson.JSON;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 public class ActiveMqManagerTest {
 
-	@Test
-	public void queueTest() {
-		ActiveMqManager m = new ActiveMqManager(
-				"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0");
+    @Test
+    public void test1() {
+        TestActiveMqSubscriber subscriber = new TestActiveMqSubscriber();
 
-		MessageProducer p = m.createQueueProducer("testjava");
+        DemoDomainEvent demoDomainEvent = new DemoDomainEvent();
+        demoDomainEvent.setName("XXXXX");
 
-		m.registerQueueConsumer("testjava", new MessageListener() {
+        subscriber.handleEvent(JSON.toJSONString(demoDomainEvent));
+    }
 
-			@Override
-			public void onMessage(Message message) {
-				TextMessage msg = (TextMessage) message;
+    @Test
+    public void queueTest() {
+        ActiveMqManager m = new ActiveMqManager(
+                "tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0");
 
-				try {
-					String text = msg.getText();
-					System.out.println(text);
-					msg.acknowledge();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+        MessageProducer p = m.createQueueProducer("testjava");
 
-			}
-		});
+        m.registerQueueConsumer("testjava", new MessageListener() {
 
-		int i = 0;
-		while (i < 50) {
-			try {
-				TextMessage textMsg;
-				textMsg = m.createTextMessage("new 你好啊");
-				p.send(textMsg);
-				Thread.sleep(1000);
-			} catch (JMSException | InterruptedException e) {
-				e.printStackTrace();
-			}
-			i++;
+            @Override
+            public void onMessage(Message message) {
+                TextMessage msg = (TextMessage) message;
 
-		}
-	}
+                try {
+                    String text = msg.getText();
+                    System.out.println(text);
+                    msg.acknowledge();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-	@Test
-	public void topicTest() {
-		ActiveMqManager m = new ActiveMqManager(
-				"tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
-				"client_001");
+            }
+        });
 
-		MessageProducer p = m.createTopicPublisher("testtopic");
+        int i = 0;
+        while (i < 50) {
+            try {
+                TextMessage textMsg;
+                textMsg = m.createTextMessage("new 你好啊");
+                p.send(textMsg);
+                Thread.sleep(1000);
+            } catch (JMSException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            i++;
 
-		m.registerTopicConsumer("testtopic", "wechat", new MessageListener() {
+        }
+    }
 
-			@Override
-			public void onMessage(Message message) {
-				TextMessage textMsg = (TextMessage) message;
+    @Test
+    public void topicTest() {
+        ActiveMqManager m = new ActiveMqManager(
+                "tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
+                "client_001");
 
-				try {
-					String text = textMsg.getText();
-					System.out.println("webchat" + text);
+        MessageProducer p = m.createTopicPublisher("testtopic");
 
-					message.acknowledge();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+        m.registerTopicConsumer("testtopic", "wechat", new MessageListener() {
 
-		m.registerTopicConsumer("testtopic", "email", new MessageListener() {
+            @Override
+            public void onMessage(Message message) {
+                TextMessage textMsg = (TextMessage) message;
 
-			@Override
-			public void onMessage(Message message) {
-				TextMessage textMsg = (TextMessage) message;
+                try {
+                    String text = textMsg.getText();
+                    System.out.println("webchat" + text);
 
-				try {
-					String text = textMsg.getText();
-					System.out.println("email" + text);
+                    message.acknowledge();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
-					message.acknowledge();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+        m.registerTopicConsumer("testtopic", "email", new MessageListener() {
 
-			}
-		});
+            @Override
+            public void onMessage(Message message) {
+                TextMessage textMsg = (TextMessage) message;
 
-		int i = 0;
-		while (i < 50) {
-			try {
-				TextMessage textMsg;
-				textMsg = m.createTextMessage("new 你好啊");
-				p.send(textMsg);
-				Thread.sleep(1000);
-			} catch (JMSException | InterruptedException e) {
-				e.printStackTrace();
-			}
-			i++;
+                try {
+                    String text = textMsg.getText();
+                    System.out.println("email" + text);
 
-		}
+                    message.acknowledge();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-	}
-	@AfterClass
-	public static void clear(){
-		ActiveMqManagerFactory.clear();
-	}
+            }
+        });
+
+        int i = 0;
+        while (i < 50) {
+            try {
+                TextMessage textMsg;
+                textMsg = m.createTextMessage("new 你好啊");
+                p.send(textMsg);
+                Thread.sleep(1000);
+            } catch (JMSException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            i++;
+
+        }
+
+    }
+
+    @AfterClass
+    public static void clear() {
+        ActiveMqManagerFactory.clear();
+    }
 }

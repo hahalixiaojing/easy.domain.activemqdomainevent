@@ -143,20 +143,8 @@ public class ActiveMqManager {
 			try {
 				connection.close();
 			} catch (JMSException e) {
-				e.printStackTrace();
+
 			}
 		}
 	}
-
-	@Override
-	protected void finalize() {
-		if (connection != null) {
-			try {
-				connection.close();
-			} catch (JMSException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 }
