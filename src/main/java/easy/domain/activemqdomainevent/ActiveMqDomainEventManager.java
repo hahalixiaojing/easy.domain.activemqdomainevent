@@ -1,7 +1,9 @@
 package easy.domain.activemqdomainevent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
@@ -22,8 +24,9 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
 
     private final ActiveMqManager manager;
     private final HashMap<String, MessageProducer> producers = new HashMap<>();
+    private Map<String, List<ISubscriber>> stringListMap;
 
-    public ActiveMqDomainEventManager(ActiveMqManager activeMqManager) {
+    public ActiveMqDomainEventManager(ActiveMqManager activeMqManager) throws Exception {
         this.manager = activeMqManager;
     }
 
@@ -33,9 +36,15 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
         for (Class<?> cls : domainEventTypes) {
 
             String evtName = ClassUtils.getShortName(cls);
-            MessageProducer producer = this.manager
-                    .createTopicPublisher(evtName);
-            this.producers.put(evtName, producer);
+            MessageProducer messageProducer = this.manager.createQueueProducer(ClassUtils.getShortName(cls));
+
+            this.producers.put(evtName, messageProducer);
+
+            this.manager.registerQueueConsumer(evtName, new MessageListener() {
+                @Override
+                public void onMessage(Message message) {
+                }
+            });
 
         }
 
@@ -44,46 +53,44 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
     @Override
     public void registerSubscriber(List<ISubscriber> items) {
 
-        String evtName = StringUtils.EMPTY;
-        if (items.size() > 0) {
-            evtName = ClassUtils.getShortName(items.get(0).suscribedToEventType());
-        }
-        for (final ISubscriber subscriber : items) {
+        stringListMap = new HashMap<>();
 
-            String subscriberName = subscriber.getClass().getName();
-            this.manager.registerTopicConsumer(evtName, subscriberName, null,
-                    new MessageListener() {
+        for (ISubscriber subscriber : items) {
+            String event = ClassUtils.getShortName(subscriber.suscribedToEventType());
 
-                        @Override
-                        public void onMessage(Message message) {
-                            TextMessage textMsg = (TextMessage) message;
-                            IActiveMqDomainEventSubscriber sub = (IActiveMqDomainEventSubscriber) subscriber;
+            if (stringListMap.containsKey(event)) {
+                stringListMap.get(event).add(subscriber);
+            } else {
+                List<ISubscriber> subscribers = new ArrayList<>();
+                subscribers.add(subscriber);
 
-                            try {
-                                sub.handleEvent(textMsg.getText());
-                                message.acknowledge();
-                            } catch (Exception e) {
-
-                            }
-                        }
-                    });
+                stringListMap.put(event, subscribers);
+            }
         }
     }
 
     @Override
-    public <T extends IDomainEvent> void publishEvent(T obj) {
-        String evt = obj.getClass().getName();
+    public <T extends IDomainEvent> void publishEvent(T obj) throws Exception {
+
+        String evt = ClassUtils.getShortName(obj.getClass());
         if (!this.producers.containsKey(evt)) {
             return;
         }
+
+        if (this.stringListMap.containsKey(evt)) {
+            return;
+        }
+
         MessageProducer producer = producers.get(evt);
-        String jsonText = JSON.toJSONString(obj);
-        TextMessage textMsg = this.manager.createTextMessage(jsonText);
-        try {
+
+        List<ISubscriber> subscribers = this.stringListMap.get(evt);
+        for (ISubscriber subscriber : subscribers) {
+            String jsonText = JSON.toJSONString(obj);
+            TextMessage textMsg = this.manager.createTextMessage(jsonText);
+            textMsg.setStringProperty("EVENT", evt);
+            textMsg.setStringProperty("SUBSCRIBER", subscriber.getClass().getName());
             textMsg.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
             producer.send(textMsg);
-
-        } catch (JMSException e) {
         }
     }
 }
