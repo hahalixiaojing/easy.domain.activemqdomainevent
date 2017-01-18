@@ -1,21 +1,21 @@
 package easy.domain.activemqdomainevent;
 
+import com.alibaba.fastjson.JSON;
 import easy.domain.event.IDomainEvent;
 
-public class Demo2Subscriber implements IActiveMqDomainEventSubscriber {
+import static javafx.scene.input.KeyCode.J;
 
-	@Override
-	public  Class<?> suscribedToEventType() {
-		return DemoDomainEvent.class;
-	}
+public class Demo2Subscriber extends AbstractJsonActiveMqDomainEventSubscriber<DemoDomainEvent> {
 
-	@Override
-	public void handleEvent(String aDomainEvent) {
 
-		System.out.println("thread id=" + Thread.currentThread().getId());
-		System.out.println("event name= " + aDomainEvent);
-		System.out.println("subscriber= " + this.getClass().getName());
+    @Override
+    public Class<?> subscribedToEventType() {
+        return DemoDomainEvent.class;
+    }
 
-	}
+    @Override
+    public void handleEvent(DemoDomainEvent data) {
+        System.out.println("thread id=" + Thread.currentThread().getId() + " " + JSON.toJSONString(data) + " " + this.getClass().getSimpleName());
 
+    }
 }

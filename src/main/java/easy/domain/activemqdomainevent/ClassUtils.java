@@ -12,9 +12,12 @@ abstract class ClassUtils {
             if (i == names.length - 1) {
                 stringBuilder.append(names[i]);
             }
+            else {
+                stringBuilder.append(names[i].substring(0, 1));
+                stringBuilder.append(".");
+            }
 
-            stringBuilder.append(names[i].substring(0, 1));
-            stringBuilder.append(".");
+
         }
         return stringBuilder.toString();
     }

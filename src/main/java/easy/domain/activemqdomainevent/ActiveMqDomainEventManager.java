@@ -24,7 +24,7 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
 
     private final ActiveMqManager manager;
     private final HashMap<String, MessageProducer> producers = new HashMap<>();
-    private Map<String, List<ISubscriber>> stringListMap;
+    private Map<String, List<ISubscriber>> stringListMap = new HashMap<>();
 
     public ActiveMqDomainEventManager(ActiveMqManager activeMqManager) throws Exception {
         this.manager = activeMqManager;
@@ -36,15 +36,34 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
         for (Class<?> cls : domainEventTypes) {
 
             String evtName = ClassUtils.getShortName(cls);
-            MessageProducer messageProducer = this.manager.createQueueProducer(ClassUtils.getShortName(cls));
+            MessageProducer messageProducer = this.manager.createQueueProducer(evtName);
 
             this.producers.put(evtName, messageProducer);
+            for (int i = 0; i < 2; i++) {
+                this.manager.registerQueueConsumer(evtName, new MessageListener() {
+                    @Override
+                    public void onMessage(Message message) {
+                        try {
+                            String event = message.getStringProperty("EVENT");
+                            String subscriber = message.getStringProperty("SUBSCRIBER");
 
-            this.manager.registerQueueConsumer(evtName, new MessageListener() {
-                @Override
-                public void onMessage(Message message) {
-                }
-            });
+                            List<ISubscriber> subscribers = stringListMap.get(event);
+                            for (ISubscriber s : subscribers) {
+                                if (ClassUtils.getShortName(s.getClass()).equals(subscriber)) {
+                                    IActiveMqDomainEventSubscriber mqSubscriber = (IActiveMqDomainEventSubscriber) s;
+                                    TextMessage textMessage = (TextMessage) message;
+                                    mqSubscriber.handleEvent(textMessage.getText());
+                                    message.acknowledge();
+                                    break;
+                                }
+                            }
+
+                        } catch (Exception e) {
+                        }
+
+                    }
+                });
+            }
 
         }
 
@@ -53,10 +72,8 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
     @Override
     public void registerSubscriber(List<ISubscriber> items) {
 
-        stringListMap = new HashMap<>();
-
         for (ISubscriber subscriber : items) {
-            String event = ClassUtils.getShortName(subscriber.suscribedToEventType());
+            String event = ClassUtils.getShortName(subscriber.subscribedToEventType());
 
             if (stringListMap.containsKey(event)) {
                 stringListMap.get(event).add(subscriber);
@@ -73,22 +90,19 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
     public <T extends IDomainEvent> void publishEvent(T obj) throws Exception {
 
         String evt = ClassUtils.getShortName(obj.getClass());
-        if (!this.producers.containsKey(evt)) {
-            return;
-        }
-
-        if (this.stringListMap.containsKey(evt)) {
+        if (!this.producers.containsKey(evt) || !this.stringListMap.containsKey(evt)) {
             return;
         }
 
         MessageProducer producer = producers.get(evt);
 
         List<ISubscriber> subscribers = this.stringListMap.get(evt);
+        String jsonText = JSON.toJSONString(obj);
+
         for (ISubscriber subscriber : subscribers) {
-            String jsonText = JSON.toJSONString(obj);
             TextMessage textMsg = this.manager.createTextMessage(jsonText);
             textMsg.setStringProperty("EVENT", evt);
-            textMsg.setStringProperty("SUBSCRIBER", subscriber.getClass().getName());
+            textMsg.setStringProperty("SUBSCRIBER", ClassUtils.getShortName(subscriber.getClass()));
             textMsg.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
             producer.send(textMsg);
         }

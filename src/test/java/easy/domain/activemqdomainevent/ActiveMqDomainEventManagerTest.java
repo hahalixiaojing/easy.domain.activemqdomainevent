@@ -11,101 +11,66 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import easy.domain.event.ISubscriber;
+import org.junit.rules.Stopwatch;
 
 public class ActiveMqDomainEventManagerTest {
 
-	private ActiveMqDomainEventManager create(String clientid) {
+    private ActiveMqDomainEventManager create() throws Exception {
 
-		// failover:(tcp://broker1:61616,tcp://broker2:61616,tcp://broker3:61616)
+        // failover:(tcp://broker1:61616,tcp://broker2:61616,tcp://broker3:61616)
 
 //		ActiveMqManager activeMq = ActiveMqManagerFactory
 //				.createActiveMqManager(
 //						"failover:(tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0,tcp://127.0.0.1:61617?wireFormat.maxInactivityDuration=0)",
 //						clientid);
 
-		 ActiveMqManager activeMq = ActiveMqManagerFactory
-		 .createActiveMqManager(
-		 "tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0",
-		 clientid);
+        ActiveMqManager activeMq = ActiveMqManagerFactory
+                .createActiveMqManager(
+                        "tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0"
+                );
 
-		ActiveMqDomainEventManager manager = new ActiveMqDomainEventManager(
-				activeMq);
+        ActiveMqDomainEventManager manager = new ActiveMqDomainEventManager(
+                activeMq);
 
-		ArrayList<Class<?>> ar = new ArrayList<>();
-		ar.add(DemoDomainEvent.class);
+        ArrayList<Class<?>> ar = new ArrayList<>();
+        ar.add(DemoDomainEvent.class);
+        ar.add(Demo2DomainEvent.class);
 
-		manager.registerDomainEvent(ar);
+        manager.registerDomainEvent(ar);
 
-		DemoSubscriber dsub = new DemoSubscriber();
-		Demo2Subscriber dsub2 = new Demo2Subscriber();
-		ArrayList<ISubscriber> sub = new ArrayList<>();
-		sub.add(dsub);
-		sub.add(dsub2);
+        DemoSubscriber dsub = new DemoSubscriber();
+        Demo2Subscriber dsub2 = new Demo2Subscriber();
+        ArrayList<ISubscriber> sub = new ArrayList<>();
+        sub.add(dsub);
+        sub.add(dsub2);
+        sub.add(new Test1Subscriber());
+        sub.add(new Test2Subscriber());
 
-		manager.registerSubscriber(sub);
+        manager.registerSubscriber(sub);
 
-		return manager;
+        return manager;
 
-	}
+    }
 
-	@Test
-	public void loadTest() throws Exception {
-		final DemoDomainEvent evt = new DemoDomainEvent();
-		evt.setName("test");
+    @Test
+    public void publishEventTest() throws Exception {
+        ActiveMqDomainEventManager manager = this.create();
+        StopWatch stopWatch =new StopWatch();
+        stopWatch.start();
+        for (int i = 0; i < 10000; i++) {
 
-		final ActiveMqDomainEventManager m1 = this.create("abbbc");
-		final ActiveMqDomainEventManager m2 = this.create("acccb");
-		Callable<String> c1 = new Callable<String>() {
+            manager.publishEvent(new DemoDomainEvent("aaaaa"));
+        }
+        stopWatch.stop();
 
-			@Override
-			public String call() throws Exception {
-				for (int i = 0; i < 100; i++) {
-					m1.publishEvent(evt);
-					System.out.println("send ="
-							+ Thread.currentThread().getId());
-				}
+        System.out.println("total time =" + stopWatch.getTime());
 
-				return "OK1";
-			}
-		};
-		Callable<String> c2 = new Callable<String>() {
 
-			@Override
-			public String call() throws Exception {
-				for (int i = 0; i < 100; i++) {
-					m2.publishEvent(evt);
-					System.out.println("send ="
-							+ Thread.currentThread().getId());
-				}
+        Thread.sleep(2000000);
+    }
 
-				return "OK2";
-			}
-		};
-		List<Callable<String>> callables = new ArrayList<>(2);
-		callables.add(c1);
-		callables.add(c2);
-
-		StopWatch sw = new StopWatch();
-		sw.start();
-
-		List<Future<String>> result = Executors.newFixedThreadPool(2)
-				.invokeAll(callables);
-
-		sw.stop();
-		System.out.println(String.format("total time is %s", sw.getTime()));
-
-		for (Future<String> f : result) {
-			try {
-				String r = f.get();
-				System.out.println(r);
-			} catch (Exception e) {
-
-			}
-		}
-	}
-
-	@AfterClass
-	public static void clear() {
-		ActiveMqManagerFactory.clear();
-	}
+    @AfterClass
+    public static void clear() {
+        ActiveMqManagerFactory.clear();
+    }
 }
