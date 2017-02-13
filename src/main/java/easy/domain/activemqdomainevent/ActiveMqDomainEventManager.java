@@ -39,7 +39,7 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
             MessageProducer messageProducer = this.manager.createQueueProducer(evtName);
 
             this.producers.put(evtName, messageProducer);
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 4; i++) {
                 this.manager.registerQueueConsumer(evtName, new MessageListener() {
                     @Override
                     public void onMessage(Message message) {
@@ -59,6 +59,7 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
                             }
 
                         } catch (Exception e) {
+
                         }
 
                     }

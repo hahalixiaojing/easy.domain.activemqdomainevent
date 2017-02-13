@@ -48,7 +48,6 @@ public class ActiveMqManager {
             connection.start();
 
         } catch (JMSException e) {
-            e.printStackTrace();
         }
     }
 
@@ -76,7 +75,6 @@ public class ActiveMqManager {
             topic = publisherSession.createTopic(topicName);
             return publisherSession.createProducer(topic);
         } catch (JMSException e) {
-            e.printStackTrace();
         }
         return null;
     }
@@ -118,7 +116,6 @@ public class ActiveMqManager {
             this.topicConsumers.put(subscriberName, consumer);
 
         } catch (JMSException e) {
-            e.printStackTrace();
         }
     }
 
@@ -130,7 +127,7 @@ public class ActiveMqManager {
             consumer.setMessageListener(listener);
             this.queueConsumers.add(consumer);
         } catch (JMSException e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -140,7 +137,6 @@ public class ActiveMqManager {
         try {
             message.setText(text);
         } catch (MessageNotWriteableException e) {
-            e.printStackTrace();
         }
         message.setConnection((ActiveMQConnection) connection);
         return message;

@@ -12,4 +12,9 @@ public class DemoDomainEvent implements IDomainEvent {
     public DemoDomainEvent(String name) {
         this.name = name;
     }
+
+    @Override
+    public String getBusinessId() {
+        return null;
+    }
 }

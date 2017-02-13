@@ -6,8 +6,6 @@ import easy.domain.event.IDomainEvent;
 
 public abstract class AbstractJsonActiveMqDomainEventSubscriber<T extends IDomainEvent> implements IActiveMqDomainEventSubscriber {
 
-
-    @Override
     public abstract Class<?> subscribedToEventType();
     public abstract void handleEvent(T data);
 
