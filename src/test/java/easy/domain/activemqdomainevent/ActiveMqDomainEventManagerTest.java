@@ -1,7 +1,9 @@
 package easy.domain.activemqdomainevent;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -32,7 +34,7 @@ public class ActiveMqDomainEventManagerTest {
         ActiveMqDomainEventManager manager = new ActiveMqDomainEventManager(
                 activeMq);
 
-        ArrayList<Class<?>> ar = new ArrayList<>();
+        Set<Class<?>> ar = new HashSet<>();
         ar.add(DemoDomainEvent.class);
         ar.add(Demo2DomainEvent.class);
 
@@ -40,7 +42,7 @@ public class ActiveMqDomainEventManagerTest {
 
         DemoSubscriber dsub = new DemoSubscriber();
         Demo2Subscriber dsub2 = new Demo2Subscriber();
-        ArrayList<ISubscriber> sub = new ArrayList<>();
+        Set<ISubscriber> sub = new HashSet<>();
         sub.add(dsub);
         sub.add(dsub2);
         sub.add(new Test1Subscriber());

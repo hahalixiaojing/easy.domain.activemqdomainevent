@@ -1,18 +1,12 @@
 package easy.domain.activemqdomainevent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.jms.DeliveryMode;
-import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 
@@ -31,7 +25,7 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
     }
 
     @Override
-    public void registerDomainEvent(List<Class<?>> domainEventTypes) {
+    public void registerDomainEvent(Set<Class<?>> domainEventTypes) {
 
         for (Class<?> cls : domainEventTypes) {
 
@@ -71,7 +65,7 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
     }
 
     @Override
-    public void registerSubscriber(List<ISubscriber> items) {
+    public void registerSubscriber(Set<ISubscriber> items) {
 
         for (ISubscriber subscriber : items) {
             String event = ClassUtils.getShortName(subscriber.subscribedToEventType());
