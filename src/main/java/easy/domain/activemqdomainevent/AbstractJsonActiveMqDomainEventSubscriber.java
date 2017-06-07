@@ -1,8 +1,8 @@
 package easy.domain.activemqdomainevent;
 
 import com.alibaba.fastjson.JSON;
+import easy.domain.application.subscriber.ISubscriber;
 import easy.domain.event.IDomainEvent;
-import easy.domain.event.ISubscriber;
 
 
 public abstract class AbstractJsonActiveMqDomainEventSubscriber<T extends IDomainEvent> implements IActiveMqDomainEventSubscriber {

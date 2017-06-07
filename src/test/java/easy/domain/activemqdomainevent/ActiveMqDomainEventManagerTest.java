@@ -8,11 +8,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import easy.domain.application.subscriber.ISubscriber;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import easy.domain.event.ISubscriber;
 import org.junit.rules.Stopwatch;
 
 public class ActiveMqDomainEventManagerTest {

@@ -17,12 +17,15 @@ import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class ActiveMqManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActiveMqManager.class);
     private Connection connection;
     private final List<MessageConsumer> queueConsumers = new ArrayList<>();
     private final HashMap<String, MessageConsumer> topicConsumers = new HashMap<>();
@@ -48,6 +51,7 @@ public class ActiveMqManager {
             connection.start();
 
         } catch (JMSException e) {
+            LOGGER.error("create activemq error", e);
         }
     }
 
@@ -75,6 +79,7 @@ public class ActiveMqManager {
             topic = publisherSession.createTopic(topicName);
             return publisherSession.createProducer(topic);
         } catch (JMSException e) {
+            LOGGER.error("create topic error", e);
         }
         return null;
     }
@@ -87,7 +92,7 @@ public class ActiveMqManager {
 
             return producerSession.createProducer(dest);
         } catch (JMSException e) {
-
+            LOGGER.error("create queue error", e);
         }
         return null;
     }
@@ -116,6 +121,8 @@ public class ActiveMqManager {
             this.topicConsumers.put(subscriberName, consumer);
 
         } catch (JMSException e) {
+            LOGGER.error("create toppic consumer error", e);
+
         }
     }
 
@@ -128,6 +135,7 @@ public class ActiveMqManager {
             this.queueConsumers.add(consumer);
         } catch (JMSException e) {
 
+            LOGGER.error("create queue consumer error", e);
         }
     }
 
@@ -137,6 +145,8 @@ public class ActiveMqManager {
         try {
             message.setText(text);
         } catch (MessageNotWriteableException e) {
+            LOGGER.error("write activemq error", e);
+
         }
         message.setConnection((ActiveMQConnection) connection);
         return message;
@@ -147,6 +157,7 @@ public class ActiveMqManager {
             try {
                 connection.close();
             } catch (JMSException e) {
+                LOGGER.error("close activemq error", e);
 
             }
         }
