@@ -72,6 +72,11 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
     }
 
     @Override
+    public void registerSubscriber(ISubscriber subscriber, String alias) {
+        //TODO:待实现
+    }
+
+    @Override
     public void registerDomainEvent(Set<Class<?>> domainEventTypes) {
 
         for (Class<?> cls : domainEventTypes) {
