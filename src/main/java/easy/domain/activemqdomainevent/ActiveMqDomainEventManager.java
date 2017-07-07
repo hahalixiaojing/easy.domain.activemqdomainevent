@@ -70,7 +70,6 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
             stringListMap.put(event, subscribers);
         }
     }
-
     @Override
     public void registerSubscriber(ISubscriber subscriber, String alias) {
         //TODO:待实现
@@ -106,5 +105,9 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
             textMsg.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
             messageProducer.send(new ActiveMQQueue(evt), textMsg);
         }
+    }
+
+    public <T extends IDomainEvent> void publishEvent(T obj, String subscriber) throws Exception {
+        //TODO:待实现
     }
 }
