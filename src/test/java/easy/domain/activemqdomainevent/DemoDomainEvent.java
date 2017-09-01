@@ -1,7 +1,9 @@
 package easy.domain.activemqdomainevent;
 
+import easy.domain.event.EventName;
 import easy.domain.event.IDomainEvent;
 
+@EventName("NewEvent")
 public class DemoDomainEvent implements IDomainEvent {
 
     public String name;

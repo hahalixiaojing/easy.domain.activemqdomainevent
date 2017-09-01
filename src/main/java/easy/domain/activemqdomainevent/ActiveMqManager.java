@@ -93,8 +93,8 @@ public class ActiveMqManager {
             return producerSession.createProducer(dest);
         } catch (JMSException e) {
             LOGGER.error("create queue error", e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public MessageProducer createQueueProducer() throws Exception {
@@ -121,8 +121,7 @@ public class ActiveMqManager {
             this.topicConsumers.put(subscriberName, consumer);
 
         } catch (JMSException e) {
-            LOGGER.error("create toppic consumer error", e);
-
+            throw new RuntimeException(e);
         }
     }
 
@@ -136,6 +135,7 @@ public class ActiveMqManager {
         } catch (JMSException e) {
 
             LOGGER.error("create queue consumer error", e);
+            throw  new RuntimeException(e);
         }
     }
 
@@ -146,6 +146,7 @@ public class ActiveMqManager {
             message.setText(text);
         } catch (MessageNotWriteableException e) {
             LOGGER.error("write activemq error", e);
+            throw  new RuntimeException(e);
 
         }
         message.setConnection((ActiveMQConnection) connection);
@@ -158,7 +159,6 @@ public class ActiveMqManager {
                 connection.close();
             } catch (JMSException e) {
                 LOGGER.error("close activemq error", e);
-
             }
         }
     }
