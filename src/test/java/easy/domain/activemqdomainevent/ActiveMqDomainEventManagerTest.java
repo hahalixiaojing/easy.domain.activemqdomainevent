@@ -40,15 +40,11 @@ public class ActiveMqDomainEventManagerTest {
 
         manager.registerDomainEvent(ar);
 
+
         DemoSubscriber dsub = new DemoSubscriber();
         Demo2Subscriber dsub2 = new Demo2Subscriber();
-        Set<ISubscriber> sub = new HashSet<>();
-        sub.add(dsub);
-        sub.add(dsub2);
-        sub.add(new Test1Subscriber());
-        sub.add(new Test2Subscriber());
-
-        manager.registerSubscriber(sub);
+        manager.registerSubscriber(dsub,"dssub");
+        manager.registerSubscriber(dsub2,"dssub2");
 
         return manager;
 
