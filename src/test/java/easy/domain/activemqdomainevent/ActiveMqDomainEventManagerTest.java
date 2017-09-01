@@ -32,7 +32,7 @@ public class ActiveMqDomainEventManagerTest {
                 );
 
         ActiveMqDomainEventManager manager = new ActiveMqDomainEventManager(
-                activeMq);
+                activeMq,"");
 
         Set<Class<?>> ar = new HashSet<>();
         ar.add(DemoDomainEvent.class);
