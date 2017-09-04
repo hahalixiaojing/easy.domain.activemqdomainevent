@@ -32,7 +32,7 @@ public class ActiveMqDomainEventManagerTest {
                 );
 
         ActiveMqDomainEventManager manager = new ActiveMqDomainEventManager(
-                activeMq,"");
+                activeMq, "");
 
         Set<Class<?>> ar = new HashSet<>();
         ar.add(DemoDomainEvent.class);
@@ -43,17 +43,29 @@ public class ActiveMqDomainEventManagerTest {
 
         DemoSubscriber dsub = new DemoSubscriber();
         Demo2Subscriber dsub2 = new Demo2Subscriber();
-        manager.registerSubscriber(dsub,"dssub");
-        manager.registerSubscriber(dsub2,"dssub2");
+        manager.registerSubscriber(dsub, "dssub");
+        manager.registerSubscriber(dsub2, "dssub2");
 
         return manager;
 
     }
 
     @Test
+    public void publishOneEventTest() throws Exception {
+        ActiveMqDomainEventManager manager = this.create();
+        manager.publishEvent(new DemoDomainEvent("aaaaa"));
+        manager.publishEvent(new DemoDomainEvent("aaaaa"));
+        manager.publishEvent(new DemoDomainEvent("aaaaa"));
+
+        Thread.sleep(2000000);
+
+    }
+
+
+    @Test
     public void publishEventTest() throws Exception {
         ActiveMqDomainEventManager manager = this.create();
-        StopWatch stopWatch =new StopWatch();
+        StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         for (int i = 0; i < 10000; i++) {
 

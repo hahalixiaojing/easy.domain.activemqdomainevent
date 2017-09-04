@@ -10,6 +10,7 @@ public class DemoSubscriber extends AbstractJsonActiveMqDomainEventSubscriber<De
 
     @Override
     public void handleEvent(DemoDomainEvent data) {
+        System.out.println("这是我");
         System.out.println("thread id=" + Thread.currentThread().getId() + " " + JSON.toJSONString(data) + " " + this.getClass().getSimpleName());
     }
 }
