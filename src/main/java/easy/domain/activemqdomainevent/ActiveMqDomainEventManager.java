@@ -7,6 +7,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
+import javax.management.RuntimeMBeanException;
 
 import com.alibaba.fastjson.JSON;
 
@@ -124,27 +125,29 @@ public class ActiveMqDomainEventManager implements IDomainEventManager {
     }
 
     @Override
-    public <T extends IDomainEvent> void publishEvent(T obj) throws Exception {
+    public <T extends IDomainEvent> void publishEvent(T obj) {
 
-        String evt = this.getEventName(obj.getClass());
-        Map<String, ISubscriber> stringISubscriberMap = this.subsribers.get(evt);
+        try {
+            String evt = this.getEventName(obj.getClass());
+            Map<String, ISubscriber> stringISubscriberMap = this.subsribers.get(evt);
 
-        if (stringISubscriberMap != null) {
-            String jsonText = JSON.toJSONString(obj);
+            if (stringISubscriberMap != null) {
+                String jsonText = JSON.toJSONString(obj);
 
-            Collection<ISubscriber> subscribers = stringISubscriberMap.values();
-            for (Map.Entry<String, ISubscriber> subscriber : stringISubscriberMap.entrySet()) {
-                TextMessage textMsg = this.manager.createTextMessage(jsonText);
-                textMsg.setStringProperty("SUBSCRIBER", subscriber.getKey());
-                textMsg.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
-                messageProducer.send(new ActiveMQQueue(evt), textMsg);
+                Collection<ISubscriber> subscribers = stringISubscriberMap.values();
+                for (Map.Entry<String, ISubscriber> subscriber : stringISubscriberMap.entrySet()) {
+                    TextMessage textMsg = this.manager.createTextMessage(jsonText);
+                    textMsg.setStringProperty("SUBSCRIBER", subscriber.getKey());
+                    textMsg.setJMSDeliveryMode(DeliveryMode.PERSISTENT);
+                    messageProducer.send(new ActiveMQQueue(evt), textMsg);
+                }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-
     }
 
-    public <T extends IDomainEvent> void publishEvent(T obj, String subscriber) throws Exception {
+    public <T extends IDomainEvent> void publishEvent(T obj, String subscriber) {
         //TODO:待实现
     }
 }
